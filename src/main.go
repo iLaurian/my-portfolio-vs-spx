@@ -19,7 +19,7 @@ func main() {
 
 	router.GET("/api", func(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, gin.H{
-			"test": "ok",
+			"message": "test",
 		})
 	})
 
