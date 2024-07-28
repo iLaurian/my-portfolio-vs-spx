@@ -1,10 +1,10 @@
-FROM golang:1.22.5 as builder
+FROM golang:1.22.5-alpine3.20 AS builder
 
 WORKDIR /go/src/app
 
 ENV GO111MODULE=on
 
-RUN go get github.com/cespare/reflex
+RUN go install github.com/cespare/reflex@latest
 
 COPY go.mod .
 COPY go.sum .
@@ -15,11 +15,11 @@ COPY . .
 
 RUN go build -o ./run .
 
-FROM alpine:latest
+FROM alpine:3.20
 RUN apk --no=cache add ca-certificates
 WORKDIR /root/
 
 COPY --from=builder /go/src/app/run .
 
-EXPOSE 80
+EXPOSE 8080
 CMD ["./run"]

@@ -1,0 +1,30 @@
+services:
+  reverse-proxy:
+    image: traefik:v3.1.0
+    command: 
+      - "--api.insecure=true"
+      - "--providers.docker"
+      - "--providers.docker.exposedByDefault=false"
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+  goapp:
+    build:
+      context: ./src
+      target: builder
+    image: goapp
+    expose:
+      - "8080"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.goapp.rule=Host(`127.0.0.1`) && PathPrefix(`/api`)"
+      - "traefik.http.services.goapp.loadbalancer.server.port=8080"
+    env_file:
+      - .env
+    environment:
+      - ENV=dev
+    volumes:
+      - ./src:/go/src/app
+    command: reflex -r "\.go$$" -s -- sh -c "go run ./"
