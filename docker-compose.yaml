@@ -13,7 +13,7 @@ services:
   goapp:
     build:
       context: ./src
-      target: builder
+      # target: builder
     image: goapp
     expose:
       - "8080"
@@ -25,6 +25,10 @@ services:
       - .env
     environment:
       - ENV=dev
-    volumes:
-      - ./src:/go/src/app
-    command: sh -c "go run ./"
+    develop: 
+      watch:
+        - action: sync
+          path: src/
+          target: /go/src/app
+        - action: rebuild
+          path: src/
