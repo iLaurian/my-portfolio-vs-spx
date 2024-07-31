@@ -10,6 +10,13 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/iLaurian/my-portfolio-vs-spx/controller"
+	"github.com/iLaurian/my-portfolio-vs-spx/service"
+)
+
+var (
+	transactionService    service.TransactionService       = service.New()
+	transactionController controller.TransactionController = controller.New(transactionService)
 )
 
 func main() {
@@ -17,10 +24,12 @@ func main() {
 
 	router := gin.Default()
 
-	router.GET("/api", func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, gin.H{
-			"message": "test",
-		})
+	router.GET("/api/txn", func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, transactionController.FindAll())
+	})
+
+	router.POST("/api/txn", func(ctx *gin.Context) {
+		ctx.JSON(http.StatusCreated, transactionController.Add(ctx))
 	})
 
 	srv := &http.Server{
