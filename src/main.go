@@ -24,13 +24,39 @@ func main() {
 
 	router := gin.Default()
 
-	router.GET("/api/txn", func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, transactionController.FindAll())
-	})
+	apiRoutes := router.Group("/api")
+	{
+		apiRoutes.GET("/txn", func(ctx *gin.Context) {
+			ctx.JSON(http.StatusOK, transactionController.FindAll())
+		})
 
-	router.POST("/api/txn", func(ctx *gin.Context) {
-		ctx.JSON(http.StatusCreated, transactionController.Add(ctx))
-	})
+		apiRoutes.POST("/txn/add", func(ctx *gin.Context) {
+			err := transactionController.Add(ctx)
+			if err != nil {
+				ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			} else {
+				ctx.JSON(http.StatusAccepted, gin.H{"message": "Added successfully"})
+			}
+		})
+
+		apiRoutes.POST("/txn/edit", func(ctx *gin.Context) {
+			err := transactionController.Edit(ctx)
+			if err != nil {
+				ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			} else {
+				ctx.JSON(http.StatusAccepted, gin.H{"message": "Edited successfully"})
+			}
+		})
+
+		apiRoutes.POST("/txn/delete", func(ctx *gin.Context) {
+			err := transactionController.Delete(ctx)
+			if err != nil {
+				ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			} else {
+				ctx.JSON(http.StatusAccepted, gin.H{"message": "Deleted successfully"})
+			}
+		})
+	}
 
 	srv := &http.Server{
 		Addr:    ":8080",
