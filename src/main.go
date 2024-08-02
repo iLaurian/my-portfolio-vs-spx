@@ -35,7 +35,7 @@ func main() {
 			if err != nil {
 				ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			} else {
-				ctx.JSON(http.StatusAccepted, gin.H{"message": "Added successfully"})
+				ctx.JSON(http.StatusCreated, gin.H{"message": "Added successfully"})
 			}
 		})
 
