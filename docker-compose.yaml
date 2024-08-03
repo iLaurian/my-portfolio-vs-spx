@@ -13,7 +13,6 @@ services:
   goapp:
     build:
       context: ./src
-      # target: builder
     image: goapp
     expose:
       - "8080"
@@ -37,11 +36,12 @@ services:
   postgres:
     image: "postgres:alpine3.20"
     environment:
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_PASSWORD=${PG_PASSWORD}
     ports:
       - "5432:5432"
     volumes:
       - "pg_data:/var/lib/postgresql/data"
-    command: ["postgres", "-c", "log_statement=all"]
+      - "./schema.sql:/docker-entrypoint-initdb.d/schema.sql"
+    command: ["postgres", "-c", "log_statement=none"]
 volumes:
   pg_data:

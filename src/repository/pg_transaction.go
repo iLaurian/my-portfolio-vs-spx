@@ -16,7 +16,7 @@ type PGTransactionRepository struct {
 	DB *sqlx.DB
 }
 
-func NewTransactionRepository(db *sqlx.DB) TransactionRepository {
+func New(db *sqlx.DB) TransactionRepository {
 	return &PGTransactionRepository{
 		DB: db,
 	}
@@ -27,17 +27,17 @@ func (r *PGTransactionRepository) FindAll() ([]entity.Transaction, error) {
 
 	query := "SELECT * FROM transactions"
 
-	if err := r.DB.Select(transactions, query); err != nil {
-		return transactions, err
+	if err := r.DB.Select(&transactions, query); err != nil {
+		return nil, err
 	}
 
 	return transactions, nil
 }
 
 func (r *PGTransactionRepository) Add(u entity.Transaction) error {
-	query := "INSERT INTO transactions (id, type, ticker, volume, price, date) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *"
+	query := "INSERT INTO transactions (type, ticker, volume, price, date) VALUES ($1, $2, $3, $4, $5) RETURNING id"
 
-	if err := r.DB.Get(u, query, u.ID, u.Type, u.Ticker, u.Volume, u.Price, u.Date); err != nil {
+	if err := r.DB.QueryRow(query, u.Type, u.Ticker, u.Volume, u.Price, u.Date).Scan(&u.ID); err != nil {
 		return err
 	}
 
