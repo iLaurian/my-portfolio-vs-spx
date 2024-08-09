@@ -1,20 +1,23 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
+	"github.com/redis/go-redis/v9"
 )
 
 type dbConn struct {
-	DB *sqlx.DB
+	DB          *sqlx.DB
+	RedisClient *redis.Client
 }
 
 func initDB() (*dbConn, error) {
-	log.Printf("Initializing database\n")
+	log.Printf("Initializing postgres database\n")
 
 	pgHost := os.Getenv("PG_HOST")
 	pgPort := os.Getenv("PG_PORT")
@@ -40,6 +43,23 @@ func initDB() (*dbConn, error) {
 		log.Println("db is nil")
 	}
 
+	// Initialize redis connection
+	redisHost := os.Getenv("REDIS_HOST")
+	redisPort := os.Getenv("REDIS_PORT")
+
+	log.Printf("Connecting to Redis\n")
+	rdb := redis.NewClient(&redis.Options{
+		Addr:     fmt.Sprintf("%s:%s", redisHost, redisPort),
+		Password: "",
+		DB:       0,
+	})
+
+	_, err = rdb.Ping(context.Background()).Result()
+
+	if err != nil {
+		return nil, fmt.Errorf("error connecting to redis: %w", err)
+	}
+
 	return &dbConn{
 		DB: db,
 	}, nil
@@ -48,6 +68,10 @@ func initDB() (*dbConn, error) {
 func (d *dbConn) close() error {
 	if err := d.DB.Close(); err != nil {
 		return fmt.Errorf("error closing Postgresql: %w", err)
+	}
+
+	if err := d.RedisClient.Close(); err != nil {
+		return fmt.Errorf("error closing Redis: %w", err)
 	}
 
 	return nil

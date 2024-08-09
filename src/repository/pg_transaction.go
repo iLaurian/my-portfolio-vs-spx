@@ -12,17 +12,17 @@ type TransactionRepository interface {
 	FindAll() ([]entity.Transaction, error)
 }
 
-type PGTransactionRepository struct {
+type pgTransactionRepository struct {
 	DB *sqlx.DB
 }
 
-func New(db *sqlx.DB) TransactionRepository {
-	return &PGTransactionRepository{
+func NewTransactionRepository(db *sqlx.DB) TransactionRepository {
+	return &pgTransactionRepository{
 		DB: db,
 	}
 }
 
-func (r *PGTransactionRepository) FindAll() ([]entity.Transaction, error) {
+func (r *pgTransactionRepository) FindAll() ([]entity.Transaction, error) {
 	transactions := []entity.Transaction{}
 
 	query := "SELECT * FROM transactions"
@@ -34,7 +34,7 @@ func (r *PGTransactionRepository) FindAll() ([]entity.Transaction, error) {
 	return transactions, nil
 }
 
-func (r *PGTransactionRepository) Add(u entity.Transaction) error {
+func (r *pgTransactionRepository) Add(u entity.Transaction) error {
 	query := "INSERT INTO transactions (type, ticker, volume, price, date) VALUES ($1, $2, $3, $4, $5) RETURNING id"
 
 	if err := r.DB.QueryRow(query, u.Type, u.Ticker, u.Volume, u.Price, u.Date).Scan(&u.ID); err != nil {
@@ -44,7 +44,7 @@ func (r *PGTransactionRepository) Add(u entity.Transaction) error {
 	return nil
 }
 
-func (r *PGTransactionRepository) Edit(u entity.Transaction) error {
+func (r *pgTransactionRepository) Edit(u entity.Transaction) error {
 	query := "UPDATE transactions SET (type, ticker, volume, price, date) = ($1, $2, $3, $4, $5) WHERE id=$6"
 
 	if err := r.DB.Get(u, query, u.Type, u.Ticker, u.Volume, u.Price, u.Date, u.ID); err != nil {
@@ -54,7 +54,7 @@ func (r *PGTransactionRepository) Edit(u entity.Transaction) error {
 	return nil
 }
 
-func (r *PGTransactionRepository) Delete(id int) error {
+func (r *pgTransactionRepository) Delete(id int) error {
 	query := "DELETE FROM transactions WHERE id=$1"
 
 	if _, err := r.DB.Exec(query, id); err != nil {

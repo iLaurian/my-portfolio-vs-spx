@@ -24,20 +24,24 @@ func main() {
 		log.Fatalf("Unable to initialize database: %v\n", err)
 	}
 
-	transactionRepository := repository.New(db.DB)
-	transactionService := service.New(transactionRepository)
-	transactionController := controller.New(transactionService)
+	transactionRepository := repository.NewTransactionRepository(db.DB)
+	transactionService := service.NewTransactionService(transactionRepository)
+	transactionController := controller.NewTransactionController(transactionService)
+
+	holdingRepository := repository.NewHoldingRepository(db.RedisClient)
+	holdingService := service.NewHoldingService(holdingRepository)
+	holdingController := controller.NewHoldingController(holdingService)
 
 	router := gin.Default()
 
 	apiRoutes := router.Group("/api")
 	{
 		apiRoutes.GET("/txn", func(ctx *gin.Context) {
-			txn, err := transactionController.FindAll()
+			transactions, err := transactionController.FindAll()
 			if err != nil {
 				ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			} else {
-				ctx.JSON(http.StatusOK, gin.H{"transactions": txn})
+				ctx.JSON(http.StatusOK, gin.H{"transactions": transactions})
 			}
 		})
 
@@ -59,8 +63,35 @@ func main() {
 			}
 		})
 
-		apiRoutes.POST("/txn/delete", func(ctx *gin.Context) {
+		apiRoutes.DELETE("/txn/delete", func(ctx *gin.Context) {
 			err := transactionController.Delete(ctx)
+			if err != nil {
+				ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			} else {
+				ctx.JSON(http.StatusAccepted, gin.H{"message": "Deleted successfully"})
+			}
+		})
+
+		apiRoutes.GET("/hldg", func(ctx *gin.Context) {
+			holdings, err := holdingController.GetAll()
+			if err != nil {
+				ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			} else {
+				ctx.JSON(http.StatusOK, gin.H{"holdings": holdings})
+			}
+		})
+
+		apiRoutes.GET("/hldg/update", func(ctx *gin.Context) {
+			holdings, err := holdingController.UpdateAll()
+			if err != nil {
+				ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			} else {
+				ctx.JSON(http.StatusAccepted, gin.H{"updated holdings": holdings})
+			}
+		})
+
+		apiRoutes.DELETE("/hldg/delete", func(ctx *gin.Context) {
+			err := holdingController.DeleteAll()
 			if err != nil {
 				ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			} else {

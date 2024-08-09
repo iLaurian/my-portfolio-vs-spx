@@ -13,21 +13,21 @@ type TransactionController interface {
 	Delete(ctx *gin.Context) error
 }
 
-type controller struct {
+type transactionController struct {
 	service service.TransactionService
 }
 
-func New(service service.TransactionService) TransactionController {
-	return controller{
+func NewTransactionController(service service.TransactionService) TransactionController {
+	return &transactionController{
 		service: service,
 	}
 }
 
-func (c controller) FindAll() ([]entity.Transaction, error) {
+func (c transactionController) FindAll() ([]entity.Transaction, error) {
 	return c.service.FindAll()
 }
 
-func (c controller) Add(ctx *gin.Context) error {
+func (c transactionController) Add(ctx *gin.Context) error {
 	var txn entity.Transaction
 	err := ctx.ShouldBindJSON(&txn)
 	if err != nil {
@@ -37,7 +37,7 @@ func (c controller) Add(ctx *gin.Context) error {
 	return nil
 }
 
-func (c controller) Edit(ctx *gin.Context) error {
+func (c transactionController) Edit(ctx *gin.Context) error {
 	var txn entity.Transaction
 	err := ctx.ShouldBindJSON(&txn)
 	if err != nil {
@@ -47,7 +47,7 @@ func (c controller) Edit(ctx *gin.Context) error {
 	return nil
 }
 
-func (c controller) Delete(ctx *gin.Context) error {
+func (c transactionController) Delete(ctx *gin.Context) error {
 	var request struct {
 		ID int `json:"id"`
 	}
