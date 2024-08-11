@@ -34,6 +34,7 @@ services:
     depends_on:
         - postgres
         - redis
+        - reverse-proxy
   postgres:
     image: "postgres:alpine3.20"
     environment:
@@ -50,6 +51,22 @@ services:
       - "6379:6379"
     volumes:
       - "redisdata:/data"
+  vue-client:
+    build: ./src-client
+    image: vue-client
+    expose:
+      - "5173"
+    ports:
+      - "5173:5173"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.vue-client.rule=Host(`127.0.0.1`) && PathPrefix(`/`)"
+      - "traefik.http.services.vue-client.loadbalancer.server.port=5173"
+    volumes:
+      - ./src-client:/app
+      - /app/node_modules
+    depends_on:
+      - reverse-proxy
 volumes:
   pg_data:
   redisdata:

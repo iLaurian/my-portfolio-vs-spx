@@ -1,14 +1,15 @@
 package controller
 
 import (
+	"github.com/gin-gonic/gin"
 	"github.com/iLaurian/my-portfolio-vs-spx/entity"
 	"github.com/iLaurian/my-portfolio-vs-spx/service"
 )
 
 type HoldingController interface {
-	GetAll() ([]entity.Holding, error)
-	UpdateAll() ([]entity.Holding, error)
-	DeleteAll() error
+	GetAll(ctx *gin.Context) ([]entity.Holding, error)
+	UpdateAll(ctx *gin.Context) ([]entity.Holding, error)
+	DeleteAll(ctx *gin.Context) error
 }
 
 type holdingController struct {
@@ -21,14 +22,14 @@ func NewHoldingController(service service.HoldingService) HoldingController {
 	}
 }
 
-func (c holdingController) GetAll() ([]entity.Holding, error) {
-	return c.service.GetAll()
+func (c holdingController) GetAll(ctx *gin.Context) ([]entity.Holding, error) {
+	return c.service.GetAll(ctx.Request.Context())
 }
 
-func (c holdingController) UpdateAll() ([]entity.Holding, error) {
-	return c.service.UpdateAll()
+func (c holdingController) UpdateAll(ctx *gin.Context) ([]entity.Holding, error) {
+	return c.service.UpdateAll(ctx.Request.Context())
 }
 
-func (c holdingController) DeleteAll() error {
-	return c.service.DeleteAll()
+func (c holdingController) DeleteAll(ctx *gin.Context) error {
+	return c.service.DeleteAll(ctx.Request.Context())
 }

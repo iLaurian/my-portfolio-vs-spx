@@ -1,14 +1,16 @@
 package service
 
 import (
+	"context"
+
 	"github.com/iLaurian/my-portfolio-vs-spx/entity"
 	"github.com/iLaurian/my-portfolio-vs-spx/repository"
 )
 
 type HoldingService interface {
-	GetAll() ([]entity.Holding, error)
-	UpdateAll() ([]entity.Holding, error)
-	DeleteAll() error
+	GetAll(ctx context.Context) ([]entity.Holding, error)
+	UpdateAll(ctx context.Context) ([]entity.Holding, error)
+	DeleteAll(ctx context.Context) error
 }
 
 type holdingService struct {
@@ -21,14 +23,14 @@ func NewHoldingService(repository repository.HoldingRepository) HoldingService {
 	}
 }
 
-func (s *holdingService) GetAll() ([]entity.Holding, error) {
+func (s *holdingService) GetAll(ctx context.Context) ([]entity.Holding, error) {
 	return nil, nil
 }
 
-func (s *holdingService) UpdateAll() ([]entity.Holding, error) {
+func (s *holdingService) UpdateAll(ctx context.Context) ([]entity.Holding, error) {
 	return nil, nil
 }
 
-func (s *holdingService) DeleteAll() error {
+func (s *holdingService) DeleteAll(ctx context.Context) error {
 	return nil
 }

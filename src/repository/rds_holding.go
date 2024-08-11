@@ -10,9 +10,9 @@ import (
 )
 
 type HoldingRepository interface {
-	GetAll() ([]entity.Holding, error)
-	Add(entity.Holding) error
-	DeleteAll() error
+	GetAll(ctx context.Context) ([]entity.Holding, error)
+	Add(ctx context.Context, holding entity.Holding) error
+	DeleteAll(ctx context.Context) error
 }
 
 type rdsHoldingRepository struct {
@@ -25,7 +25,7 @@ func NewHoldingRepository(redisClient *redis.Client) HoldingRepository {
 	}
 }
 
-func (r *rdsHoldingRepository) Add(holding entity.Holding) error {
+func (r *rdsHoldingRepository) Add(ctx context.Context, holding entity.Holding) error {
 	key := holding.Symbol
 
 	fields := map[string]interface{}{
@@ -45,7 +45,7 @@ func (r *rdsHoldingRepository) Add(holding entity.Holding) error {
 	return nil
 }
 
-func (r *rdsHoldingRepository) GetAll() ([]entity.Holding, error) {
+func (r *rdsHoldingRepository) GetAll(ctx context.Context) ([]entity.Holding, error) {
 	keys, err := r.Redis.Keys(context.Background(), "*").Result()
 	if err != nil {
 		return nil, fmt.Errorf("failed to retrieve keys from redis: %w", err)
@@ -114,7 +114,7 @@ func mapToHolding(symbol string, fields map[string]string) (entity.Holding, erro
 	return holding, nil
 }
 
-func (r *rdsHoldingRepository) DeleteAll() error {
+func (r *rdsHoldingRepository) DeleteAll(ctx context.Context) error {
 	err := r.Redis.FlushDB(context.Background()).Err()
 	if err != nil {
 		return fmt.Errorf("failed to delete all records from redis: %w", err)

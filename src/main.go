@@ -37,7 +37,7 @@ func main() {
 	apiRoutes := router.Group("/api")
 	{
 		apiRoutes.GET("/txn", func(ctx *gin.Context) {
-			transactions, err := transactionController.FindAll()
+			transactions, err := transactionController.FindAll(ctx)
 			if err != nil {
 				ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			} else {
@@ -73,7 +73,7 @@ func main() {
 		})
 
 		apiRoutes.GET("/hldg", func(ctx *gin.Context) {
-			holdings, err := holdingController.GetAll()
+			holdings, err := holdingController.GetAll(ctx)
 			if err != nil {
 				ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			} else {
@@ -82,7 +82,7 @@ func main() {
 		})
 
 		apiRoutes.GET("/hldg/update", func(ctx *gin.Context) {
-			holdings, err := holdingController.UpdateAll()
+			holdings, err := holdingController.UpdateAll(ctx)
 			if err != nil {
 				ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			} else {
@@ -91,7 +91,7 @@ func main() {
 		})
 
 		apiRoutes.DELETE("/hldg/delete", func(ctx *gin.Context) {
-			err := holdingController.DeleteAll()
+			err := holdingController.DeleteAll(ctx)
 			if err != nil {
 				ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			} else {

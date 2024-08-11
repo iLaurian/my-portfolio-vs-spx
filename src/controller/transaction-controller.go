@@ -7,7 +7,7 @@ import (
 )
 
 type TransactionController interface {
-	FindAll() ([]entity.Transaction, error)
+	FindAll(ctx *gin.Context) ([]entity.Transaction, error)
 	Add(ctx *gin.Context) error
 	Edit(ctx *gin.Context) error
 	Delete(ctx *gin.Context) error
@@ -23,8 +23,8 @@ func NewTransactionController(service service.TransactionService) TransactionCon
 	}
 }
 
-func (c transactionController) FindAll() ([]entity.Transaction, error) {
-	return c.service.FindAll()
+func (c transactionController) FindAll(ctx *gin.Context) ([]entity.Transaction, error) {
+	return c.service.FindAll(ctx.Request.Context())
 }
 
 func (c transactionController) Add(ctx *gin.Context) error {
@@ -33,7 +33,7 @@ func (c transactionController) Add(ctx *gin.Context) error {
 	if err != nil {
 		return err
 	}
-	c.service.Add(txn)
+	c.service.Add(ctx.Request.Context(), txn)
 	return nil
 }
 
@@ -43,7 +43,7 @@ func (c transactionController) Edit(ctx *gin.Context) error {
 	if err != nil {
 		return err
 	}
-	c.service.Edit(txn)
+	c.service.Edit(ctx.Request.Context(), txn)
 	return nil
 }
 
@@ -54,6 +54,6 @@ func (c transactionController) Delete(ctx *gin.Context) error {
 	if err := ctx.ShouldBindJSON(&request); err != nil {
 		return err
 	}
-	c.service.Delete(request.ID)
+	c.service.Delete(ctx.Request.Context(), request.ID)
 	return nil
 }

@@ -1,15 +1,17 @@
 package repository
 
 import (
+	"context"
+
 	"github.com/iLaurian/my-portfolio-vs-spx/entity"
 	"github.com/jmoiron/sqlx"
 )
 
 type TransactionRepository interface {
-	Add(entity.Transaction) error
-	Edit(entity.Transaction) error
-	Delete(id int) error
-	FindAll() ([]entity.Transaction, error)
+	Add(ctx context.Context, u entity.Transaction) error
+	Edit(ctx context.Context, u entity.Transaction) error
+	Delete(ctx context.Context, id int) error
+	FindAll(ctx context.Context) ([]entity.Transaction, error)
 }
 
 type pgTransactionRepository struct {
@@ -22,7 +24,7 @@ func NewTransactionRepository(db *sqlx.DB) TransactionRepository {
 	}
 }
 
-func (r *pgTransactionRepository) FindAll() ([]entity.Transaction, error) {
+func (r *pgTransactionRepository) FindAll(ctx context.Context) ([]entity.Transaction, error) {
 	transactions := []entity.Transaction{}
 
 	query := "SELECT * FROM transactions"
@@ -34,7 +36,7 @@ func (r *pgTransactionRepository) FindAll() ([]entity.Transaction, error) {
 	return transactions, nil
 }
 
-func (r *pgTransactionRepository) Add(u entity.Transaction) error {
+func (r *pgTransactionRepository) Add(ctx context.Context, u entity.Transaction) error {
 	query := "INSERT INTO transactions (type, ticker, volume, price, date) VALUES ($1, $2, $3, $4, $5) RETURNING id"
 
 	if err := r.DB.QueryRow(query, u.Type, u.Ticker, u.Volume, u.Price, u.Date).Scan(&u.ID); err != nil {
@@ -44,7 +46,7 @@ func (r *pgTransactionRepository) Add(u entity.Transaction) error {
 	return nil
 }
 
-func (r *pgTransactionRepository) Edit(u entity.Transaction) error {
+func (r *pgTransactionRepository) Edit(ctx context.Context, u entity.Transaction) error {
 	query := "UPDATE transactions SET (type, ticker, volume, price, date) = ($1, $2, $3, $4, $5) WHERE id=$6"
 
 	if err := r.DB.Get(u, query, u.Type, u.Ticker, u.Volume, u.Price, u.Date, u.ID); err != nil {
@@ -54,7 +56,7 @@ func (r *pgTransactionRepository) Edit(u entity.Transaction) error {
 	return nil
 }
 
-func (r *pgTransactionRepository) Delete(id int) error {
+func (r *pgTransactionRepository) Delete(ctx context.Context, id int) error {
 	query := "DELETE FROM transactions WHERE id=$1"
 
 	if _, err := r.DB.Exec(query, id); err != nil {

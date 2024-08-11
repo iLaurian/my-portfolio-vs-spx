@@ -1,15 +1,17 @@
 package service
 
 import (
+	"context"
+
 	"github.com/iLaurian/my-portfolio-vs-spx/entity"
 	"github.com/iLaurian/my-portfolio-vs-spx/repository"
 )
 
 type TransactionService interface {
-	Add(entity.Transaction) error
-	Edit(entity.Transaction) error
-	Delete(int) error
-	FindAll() ([]entity.Transaction, error)
+	Add(ctx context.Context, transaction entity.Transaction) error
+	Edit(ctx context.Context, transaction entity.Transaction) error
+	Delete(ctx context.Context, id int) error
+	FindAll(ctx context.Context) ([]entity.Transaction, error)
 }
 
 type transactionService struct {
@@ -22,29 +24,29 @@ func NewTransactionService(repository repository.TransactionRepository) Transact
 	}
 }
 
-func (s *transactionService) FindAll() ([]entity.Transaction, error) {
-	transactions, err := s.repository.FindAll()
+func (s *transactionService) FindAll(ctx context.Context) ([]entity.Transaction, error) {
+	transactions, err := s.repository.FindAll(ctx)
 	return transactions, err
 }
 
-func (s *transactionService) Add(transaction entity.Transaction) error {
-	err := s.repository.Add(transaction)
+func (s *transactionService) Add(ctx context.Context, transaction entity.Transaction) error {
+	err := s.repository.Add(ctx, transaction)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (s *transactionService) Edit(transaction entity.Transaction) error {
-	err := s.repository.Edit(transaction)
+func (s *transactionService) Edit(ctx context.Context, transaction entity.Transaction) error {
+	err := s.repository.Edit(ctx, transaction)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (s *transactionService) Delete(id int) error {
-	err := s.repository.Delete(id)
+func (s *transactionService) Delete(ctx context.Context, id int) error {
+	err := s.repository.Delete(ctx, id)
 	if err != nil {
 		return err
 	}
