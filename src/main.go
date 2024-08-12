@@ -26,79 +26,83 @@ func main() {
 
 	transactionRepository := repository.NewTransactionRepository(db.DB)
 	transactionService := service.NewTransactionService(transactionRepository)
-	transactionController := controller.NewTransactionController(transactionService)
 
 	holdingRepository := repository.NewHoldingRepository(db.RedisClient)
 	holdingService := service.NewHoldingService(holdingRepository)
-	holdingController := controller.NewHoldingController(holdingService)
 
 	router := gin.Default()
 
-	apiRoutes := router.Group("/api")
-	{
-		apiRoutes.GET("/txn", func(ctx *gin.Context) {
-			transactions, err := transactionController.FindAll(ctx)
-			if err != nil {
-				ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			} else {
-				ctx.JSON(http.StatusOK, gin.H{"transactions": transactions})
-			}
-		})
+	controller.NewController(&controller.Config{
+		R:                  router,
+		TransactionService: transactionService,
+		HoldingService:     holdingService,
+	})
 
-		apiRoutes.POST("/txn/add", func(ctx *gin.Context) {
-			err := transactionController.Add(ctx)
-			if err != nil {
-				ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			} else {
-				ctx.JSON(http.StatusCreated, gin.H{"message": "Added successfully"})
-			}
-		})
+	// apiRoutes := router.Group("/api")
+	// {
+	// 	apiRoutes.GET("/txn", func(ctx *gin.Context) {
+	// 		transactions, err := transactionController.FindAll(ctx)
+	// 		if err != nil {
+	// 			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	// 		} else {
+	// 			ctx.JSON(http.StatusOK, gin.H{"transactions": transactions})
+	// 		}
+	// 	})
 
-		apiRoutes.POST("/txn/edit", func(ctx *gin.Context) {
-			err := transactionController.Edit(ctx)
-			if err != nil {
-				ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			} else {
-				ctx.JSON(http.StatusAccepted, gin.H{"message": "Edited successfully"})
-			}
-		})
+	// 	apiRoutes.POST("/txn/add", func(ctx *gin.Context) {
+	// 		err := transactionController.Add(ctx)
+	// 		if err != nil {
+	// 			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	// 		} else {
+	// 			ctx.JSON(http.StatusCreated, gin.H{"message": "Added successfully"})
+	// 		}
+	// 	})
 
-		apiRoutes.DELETE("/txn/delete", func(ctx *gin.Context) {
-			err := transactionController.Delete(ctx)
-			if err != nil {
-				ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			} else {
-				ctx.JSON(http.StatusAccepted, gin.H{"message": "Deleted successfully"})
-			}
-		})
+	// 	apiRoutes.POST("/txn/edit", func(ctx *gin.Context) {
+	// 		err := transactionController.Edit(ctx)
+	// 		if err != nil {
+	// 			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	// 		} else {
+	// 			ctx.JSON(http.StatusAccepted, gin.H{"message": "Edited successfully"})
+	// 		}
+	// 	})
 
-		apiRoutes.GET("/hldg", func(ctx *gin.Context) {
-			holdings, err := holdingController.GetAll(ctx)
-			if err != nil {
-				ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			} else {
-				ctx.JSON(http.StatusOK, gin.H{"holdings": holdings})
-			}
-		})
+	// 	apiRoutes.DELETE("/txn/delete", func(ctx *gin.Context) {
+	// 		err := transactionController.Delete(ctx)
+	// 		if err != nil {
+	// 			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	// 		} else {
+	// 			ctx.JSON(http.StatusAccepted, gin.H{"message": "Deleted successfully"})
+	// 		}
+	// 	})
 
-		apiRoutes.GET("/hldg/update", func(ctx *gin.Context) {
-			holdings, err := holdingController.UpdateAll(ctx)
-			if err != nil {
-				ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			} else {
-				ctx.JSON(http.StatusAccepted, gin.H{"updated holdings": holdings})
-			}
-		})
+	// 	apiRoutes.GET("/hldg", func(ctx *gin.Context) {
+	// 		holdings, err := holdingController.GetAll(ctx)
+	// 		if err != nil {
+	// 			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	// 		} else {
+	// 			ctx.JSON(http.StatusOK, gin.H{"holdings": holdings})
+	// 		}
+	// 	})
 
-		apiRoutes.DELETE("/hldg/delete", func(ctx *gin.Context) {
-			err := holdingController.DeleteAll(ctx)
-			if err != nil {
-				ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			} else {
-				ctx.JSON(http.StatusAccepted, gin.H{"message": "Deleted successfully"})
-			}
-		})
-	}
+	// 	apiRoutes.GET("/hldg/update", func(ctx *gin.Context) {
+	// 		holdings, err := holdingController.UpdateAll(ctx)
+	// 		if err != nil {
+	// 			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	// 		} else {
+	// 			ctx.JSON(http.StatusAccepted, gin.H{"updated holdings": holdings})
+	// 		}
+	// 	})
+
+	// 	apiRoutes.DELETE("/hldg/delete", func(ctx *gin.Context) {
+	// 		err := holdingController.DeleteAll(ctx)
+	// 		if err != nil {
+	// 			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	// 		} else {
+	// 			ctx.JSON(http.StatusAccepted, gin.H{"message": "Deleted successfully"})
+	// 		}
+	// 	})
+	// }
 
 	srv := &http.Server{
 		Addr:    ":8080",
