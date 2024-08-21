@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -27,6 +28,7 @@ func NewController(c *Config) {
 
 	apiRoutes := c.R.Group("/api")
 	{
+		apiRoutes.GET("/txn/:id", controller.FindTransactionById)
 		apiRoutes.GET("/txn", controller.FindAllTransactions)
 		apiRoutes.POST("/txn/add", controller.AddTransaction)
 		apiRoutes.POST("/txn/edit", controller.EditTransaction)
@@ -35,6 +37,16 @@ func NewController(c *Config) {
 		apiRoutes.GET("/hldg", controller.GetAllHoldings)
 		apiRoutes.GET("/hldg/update", controller.UpdateAllHoldings)
 		apiRoutes.DELETE("/hldg/delete", controller.DeleteAllHoldings)
+	}
+}
+
+func (c *Controller) FindTransactionById(ctx *gin.Context) {
+	transaction, err := c.TransactionService.FindById(ctx.Request.Context(), ctx.Param("id"))
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	} else {
+		ctx.JSON(http.StatusOK, gin.H{"transaction": transaction})
 	}
 }
 
@@ -50,6 +62,7 @@ func (c *Controller) FindAllTransactions(ctx *gin.Context) {
 
 func (c *Controller) AddTransaction(ctx *gin.Context) {
 	var txn entity.Transaction
+	log.Println(ctx)
 	if err := ctx.ShouldBindJSON(&txn); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

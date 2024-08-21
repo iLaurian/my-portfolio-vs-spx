@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"strconv"
 
 	"github.com/iLaurian/my-portfolio-vs-spx/entity"
 	"github.com/iLaurian/my-portfolio-vs-spx/repository"
@@ -12,6 +13,7 @@ type TransactionService interface {
 	Edit(ctx context.Context, transaction entity.Transaction) error
 	Delete(ctx context.Context, id int) error
 	FindAll(ctx context.Context) ([]entity.Transaction, error)
+	FindById(ctx context.Context, id string) (entity.Transaction, error)
 }
 
 type transactionService struct {
@@ -22,6 +24,15 @@ func NewTransactionService(repository repository.TransactionRepository) Transact
 	return &transactionService{
 		repository: repository,
 	}
+}
+
+func (s *transactionService) FindById(ctx context.Context, id string) (entity.Transaction, error) {
+	i, err := strconv.Atoi(id)
+	if err != nil {
+		return entity.Transaction{}, err
+	}
+	transaction, err := s.repository.FindById(ctx, i)
+	return transaction, err
 }
 
 func (s *transactionService) FindAll(ctx context.Context) ([]entity.Transaction, error) {

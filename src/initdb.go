@@ -61,7 +61,8 @@ func initDB() (*dbConn, error) {
 	}
 
 	return &dbConn{
-		DB: db,
+		DB:          db,
+		RedisClient: rdb,
 	}, nil
 }
 
